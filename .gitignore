@@ -9,3 +9,6 @@ venv/
 .deepeval-cache.json
 .deepeval_telemetry.txt
 reports/
+.deepeval/
+.latest_run_full.json
+.latest_test_run.json
