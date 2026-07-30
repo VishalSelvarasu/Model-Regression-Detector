@@ -18,6 +18,7 @@ on:
       - 'src/**'
       - 'scripts/**'
       - 'tests/**'
+      - 'data/golden_dataset.json'
 
   push:
     branches: [main]
@@ -26,7 +27,7 @@ on:
       - 'src/**'
       - 'scripts/**'
       - 'tests/**'
-
+      - 'data/golden_dataset.json'
 jobs:
   gate:
     if: github.event_name == 'pull_request'
