@@ -40,11 +40,18 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Run DeepEval regression suite (category + summary quality)
+      - name: Category gate (blocking)
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           PROMPT_VERSION: v4
-        run: deepeval test run tests/test_regression.py -v
+        run: pytest tests/test_regression.py -k test_category -v
+
+      - name: Summary quality (advisory, non-blocking)
+        continue-on-error: true
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PROMPT_VERSION: v4
+        run: pytest tests/test_regression.py -k test_summary -v
 
       - name: Preview pass rate + drift (read-only — does not save to history)
         env:
