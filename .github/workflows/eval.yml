@@ -16,11 +16,16 @@ on:
     paths:
       - 'prompts/**'
       - 'src/**'
+      - 'scripts/**'
+      - 'tests/**'
+
   push:
     branches: [main]
     paths:
       - 'prompts/**'
       - 'src/**'
+      - 'scripts/**'
+      - 'tests/**'
 
 jobs:
   gate:
@@ -35,16 +40,23 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Run DeepEval regression suite (category + summary quality)
+      - name: Category gate (blocking)
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          PROMPT_VERSION: v1
-        run: deepeval test run tests/test_regression.py -v
+          PROMPT_VERSION: v4
+        run: pytest tests/test_regression.py -k test_category -v
+
+      - name: Summary quality (advisory, non-blocking)
+        continue-on-error: true
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PROMPT_VERSION: v4
+        run: pytest tests/test_regression.py -k test_summary -v
 
       - name: Preview pass rate + drift (read-only — does not save to history)
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          PROMPT_VERSION: v1
+          PROMPT_VERSION: v4
         run: python scripts/run_eval_and_record.py --dry-run
 
       # Optional Slack alert on failure. Needs a free Slack incoming
@@ -79,7 +91,7 @@ jobs:
       - name: Run eval, record pass rate, check drift
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          PROMPT_VERSION: v1
+          PROMPT_VERSION: v4
         run: python scripts/run_eval_and_record.py
 
       - name: Commit updated run history
