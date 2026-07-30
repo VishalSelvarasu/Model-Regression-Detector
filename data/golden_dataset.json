@@ -1,0 +1,114 @@
+[
+  {
+    "id": "case_001",
+    "input": "Temperature sensor on Line 3 is reading -40C intermittently, looks like a wiring fault.",
+    "expected_category": "sensor_fault",
+    "expected_summary": "Line 3 temperature sensor giving intermittent faulty readings, likely a wiring issue.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "case_002",
+    "input": "PLC lost connection to the HMI panel twice this morning, dropped out for about 10 seconds each time.",
+    "expected_category": "communication_error",
+    "expected_summary": "PLC-to-HMI connection dropped out twice this morning for about 10 seconds each time.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "case_003",
+    "input": "Conveyor belt motor #2 is grinding loudly and vibrating more than usual.",
+    "expected_category": "mechanical_fault",
+    "expected_summary": "Conveyor belt motor #2 is grinding and vibrating abnormally.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "case_004",
+    "input": "Daily inspection complete, all systems within normal parameters, no anomalies noted.",
+    "expected_category": "nominal",
+    "expected_summary": "Daily inspection found all systems operating normally.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "case_005",
+    "input": "gearbox making a weird grinding noise and the pressure sensor reading also looks off, not sure which is the real problem",
+    "expected_category": "mechanical_fault",
+    "expected_summary": "Gearbox noise reported alongside an abnormal pressure sensor reading; root cause unclear.",
+    "difficulty": "edge_case",
+    "notes": "Ambiguous: touches both mechanical_fault and sensor_fault. Treated as mechanical_fault since the physical noise is the primary symptom."
+  },
+  {
+    "id": "case_006",
+    "input": "presure sensr on tank 2 giving weird readigns since this morning, might be brokn",
+    "expected_category": "sensor_fault",
+    "expected_summary": "Tank 2 pressure sensor giving abnormal readings since this morning, possibly faulty.",
+    "difficulty": "edge_case",
+    "notes": "Heavy typos in input; tests robustness to noisy free text."
+  },
+  {
+    "id": "case_007",
+    "input": "oh great, the robot arm decided to just stop responding to commands again, cool cool cool, no errors logged either",
+    "expected_category": "communication_error",
+    "expected_summary": "Robot arm stopped responding to commands with no errors logged.",
+    "difficulty": "edge_case",
+    "notes": "Sarcastic tone. Core issue is a command/communication failure with the arm, not a physical symptom, so it's communication_error rather than mechanical_fault."
+  },
+  {
+    "id": "case_008",
+    "input": "Der Temperatursensor an Linie 3 zeigt seit heute Morgen komische Werte, konnte defekt sein.",
+    "expected_category": "sensor_fault",
+    "expected_summary": "Line 3 temperature sensor showing unusual readings since this morning, possibly defective.",
+    "difficulty": "edge_case",
+    "notes": "Report written in German. Should classify the same as an equivalent English report — tests multilingual handling."
+  },
+  {
+    "id": "case_009",
+    "input": "No comms from PLC-7 since 09:14, panel shows offline.",
+    "expected_category": "communication_error",
+    "expected_summary": "PLC-7 offline with no communication since 09:14.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "case_010",
+    "input": "Yesterday's sensor glitch on Line 2 hasn't recurred, everything's been steady since, closing this out.",
+    "expected_category": "nominal",
+    "expected_summary": "Line 2 sensor issue from yesterday has not recurred; systems have been steady since.",
+    "difficulty": "edge_case",
+    "notes": "Mentions a past fault but current status is nominal — tests whether the classifier over-indexes on fault keywords instead of overall status."
+  },
+  {
+    "id": "case_011",
+    "input": "Vibration levels on Pump 4 hit 12.4 mm/s, above the 10 mm/s ISO threshold, bearing wear suspected.",
+    "expected_category": "mechanical_fault",
+    "expected_summary": "Pump 4 vibration exceeded the ISO threshold, suspected bearing wear.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "case_012",
+    "input": "Modbus TCP timeout errors spiking on PLC-7, packet loss around 30 percent.",
+    "expected_category": "communication_error",
+    "expected_summary": "PLC-7 experiencing Modbus TCP timeouts with roughly 30% packet loss.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "case_013",
+    "input": "Everything seems okay but I noticed slight jitter in the encoder feedback, probably nothing.",
+    "expected_category": "sensor_fault",
+    "expected_summary": "Minor jitter noticed in encoder feedback; otherwise the system appears normal.",
+    "difficulty": "edge_case",
+    "notes": "Borderline nominal-vs-fault. The report downplays the issue but still describes a sensor anomaly, not a clean bill of health."
+  },
+  {
+    "id": "case_014",
+    "input": "Bearing on the main drive shaft is overheating and smells like burning rubber.",
+    "expected_category": "mechanical_fault",
+    "expected_summary": "Main drive shaft bearing is overheating with a burning smell.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "case_015",
+    "input": "cant tell if its the network or the actuator, arm moves late and sometimes not at all, no error codes",
+    "expected_category": "communication_error",
+    "expected_summary": "Robotic arm responding late or not at all, with no error codes logged.",
+    "difficulty": "edge_case",
+    "notes": "Genuinely ambiguous between communication_error and mechanical_fault. Labeled communication_error because delayed/missing response with zero error codes points more toward a comms/timing issue than a hard mechanical failure — but mechanical_fault is a defensible alternative answer. Good candidate to revisit once you have real-world labeled data."
+  }
+]
