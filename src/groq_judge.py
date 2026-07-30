@@ -16,7 +16,7 @@ class GroqDeepEvalLLM(DeepEvalBaseLLM):
             )
         self.model_name = model_name
         self.api_key = api_key
-        super().__init__(model_name)  # sets self.name, then calls load_model() -> self.model
+        super().__init__(model_name)
 
     def load_model(self):
         return OpenAI(api_key=self.api_key, base_url=GROQ_BASE_URL)
@@ -30,9 +30,7 @@ class GroqDeepEvalLLM(DeepEvalBaseLLM):
         return response.choices[0].message.content
 
     async def a_generate(self, prompt: str) -> str:
-        # Groq calls here are made synchronously; DeepEval's async path
-        # just calls straight through. Fine at this test volume (~15-20
-        # golden cases) — revisit if the dataset grows into the hundreds.
+        # sync call; fine at this dataset size
         return self.generate(prompt)
 
     def get_model_name(self) -> str:

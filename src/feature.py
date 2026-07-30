@@ -8,8 +8,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel
 
-load_dotenv()  # loads .env for local runs; harmless no-op in CI, where
-# secrets already arrive as real environment variables
+load_dotenv()  # loads .env locally; CI uses real env vars
 
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 DEFAULT_MODEL = "llama-3.1-8b-instant"
@@ -37,15 +36,12 @@ def _client() -> OpenAI:
 @lru_cache(maxsize=None)
 def load_prompt(version: str = "v1") -> dict:
     path = f"prompts/{version}.yaml"
-    with (open(path, encoding="utf-8") as f):
+    with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
 def _build_messages(prompt: dict, report_text: str) -> list:
-    """System prompt, then any few-shot examples as real user/assistant
-    turns, then the report to classify. Few-shot examples in the prompt
-    YAML were previously declared but never actually sent to the model —
-    this is what makes them real."""
+    """Build the message list: system prompt, few-shot examples, then the report."""
     messages = [{"role": "system", "content": prompt["system_prompt"]}]
     for example in prompt.get("few_shot_examples") or []:
         messages.append({"role": "user", "content": example["input"]})
@@ -56,15 +52,7 @@ def _build_messages(prompt: dict, report_text: str) -> list:
 
 
 def _extract_json(text: str) -> dict:
-    """Pull the first {...} block out of the model's reply and parse it.
-
-    We don't rely on response_format="json_object" here since support
-    varies by Groq model — this extraction approach is portable across
-    any Groq (or other OpenAI-compatible) model and works well in
-    practice for small JSON payloads like ours, especially at
-    temperature=0. If you confirm your chosen model supports strict JSON
-    mode, feel free to add response_format back to the API call below.
-    """
+    """Extract and parse the first {...} block from the model's reply."""
     start, end = text.find("{"), text.rfind("}")
     if start == -1 or end == -1 or end < start:
         raise ValueError(f"No JSON object found in model output: {text!r}")
@@ -76,14 +64,7 @@ def classify_fault_report(
     version: Optional[str] = None,
     model: str = DEFAULT_MODEL,
 ) -> FaultClassification:
-    """Classify a fault report into one of CATEGORIES using a given prompt version.
-
-    `version` defaults to the PROMPT_VERSION env var (falling back to
-    "v1"), so CI can control which prompt is under test per run without
-    touching code, e.g.:
-
-        PROMPT_VERSION=v2 pytest tests/test_regression.py
-    """
+    """Classify a report. Version defaults to the PROMPT_VERSION env var."""
     version = version or os.environ.get("PROMPT_VERSION", "v1")
     prompt = load_prompt(version)
     messages = _build_messages(prompt, report_text)
