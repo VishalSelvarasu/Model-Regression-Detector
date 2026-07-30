@@ -18,7 +18,7 @@ on:
       - 'src/**'
       - 'scripts/**'
       - 'tests/**'
-
+      - 'data/golden_dataset.json'
   push:
     branches: [main]
     paths:
@@ -26,6 +26,7 @@ on:
       - 'src/**'
       - 'scripts/**'
       - 'tests/**'
+      - 'data/golden_dataset.json'
 
 jobs:
   gate:
