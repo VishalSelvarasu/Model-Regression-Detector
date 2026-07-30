@@ -15,6 +15,7 @@ def run(version: str, dry_run: bool) -> float:
         cases = json.load(f)
 
     results = []
+    errors = 0
     for case in cases:
         try:
             prediction = classify_fault_report(case["input"], version=version)
@@ -22,6 +23,7 @@ def run(version: str, dry_run: bool) -> float:
         except Exception as e:
             print(f"  [ERROR] {case['id']}: {e}")
             predicted = "ERROR"
+            errors += 1
 
         correct = predicted == case["expected_category"]
         results.append(
@@ -32,10 +34,12 @@ def run(version: str, dry_run: bool) -> float:
                 "correct": correct,
             }
         )
-        print(f"  {'PASS' if correct else 'FAIL'} {case['id']}: expected={case['expected_category']} got={predicted}")
+        print(
+            f"  {'PASS' if correct else 'FAIL'} {case['id']}: expected={case['expected_category']} got={predicted}")
 
     pass_rate = sum(r["correct"] for r in results) / len(results)
-    print(f"\nPass rate: {pass_rate:.1%} ({sum(r['correct'] for r in results)}/{len(results)})")
+    print(
+        f"\nPass rate: {pass_rate:.1%} ({sum(r['correct'] for r in results)}/{len(results)})")
 
     if not dry_run:
         save_run(pass_rate)
@@ -57,12 +61,17 @@ def run(version: str, dry_run: bool) -> float:
     else:
         print("\n" + markdown)
 
+    if errors:
+        print(f"{errors} case(s) errored - failing the run")
+        sys.exit(1)
+
     return pass_rate
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--version", default=os.environ.get("PROMPT_VERSION", "v1"))
+    parser.add_argument(
+        "--version", default=os.environ.get("PROMPT_VERSION", "v1"))
     parser.add_argument(
         "--dry-run",
         action="store_true",
