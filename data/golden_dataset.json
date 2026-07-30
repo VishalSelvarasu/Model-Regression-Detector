@@ -337,5 +337,119 @@
     "expected_summary": "Loose, discolored connection lug on busbar B causing a thermal hotspot.",
     "difficulty": "easy",
     "notes": "Electrical hardware damage is grouped under mechanical_fault as a physical fault; the camera worked correctly."
+  },
+  {
+    "id": "case_046",
+    "input": "drucksensor tank2 spinnt schon wieder, werte springen hin und her",
+    "expected_category": "sensor_fault",
+    "expected_summary": "Tank 2 pressure sensor acting up again with fluctuating values.",
+    "difficulty": "edge_case",
+    "notes": "Informal German with no capitalization — colloquial 'spinnt' (acting up)."
+  },
+  {
+    "id": "case_047",
+    "input": "Encoder counts on axis 2 jump around at standstill, position readout drifts a few millimetres.",
+    "expected_category": "sensor_fault",
+    "expected_summary": "Axis 2 encoder producing unstable counts at standstill, causing position drift.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "case_048",
+    "input": "Axis 2 stalls physically mid-move with the motor whining — coupling might have worked loose.",
+    "expected_category": "mechanical_fault",
+    "expected_summary": "Axis 2 stalling mid-move with motor strain, possibly a loose coupling.",
+    "difficulty": "edge_case",
+    "notes": "Paired discriminator with case_047: same axis, but here the symptom is physical stalling, not bad readings."
+  },
+  {
+    "id": "case_049",
+    "input": "Modbus RTU polling to the energy meters times out on every third request since the wiring rework.",
+    "expected_category": "communication_error",
+    "expected_summary": "Modbus RTU polling to energy meters intermittently timing out since a wiring rework.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "case_050",
+    "input": "Long shift, checked everything twice because of yesterday's scare — belts, bearings, sensor cals, comms links — honestly all of it came back clean, no faults anywhere.",
+    "expected_category": "nominal",
+    "expected_summary": "Thorough inspection of all systems came back clean with no faults found.",
+    "difficulty": "edge_case",
+    "notes": "Rambling report that name-drops every fault category while describing a clean bill of health."
+  },
+  {
+    "id": "case_051",
+    "input": "Gearbox on the palletizer whines under load and there are metal flakes on the magnetic drain plug.",
+    "expected_category": "mechanical_fault",
+    "expected_summary": "Palletizer gearbox whining under load with metal debris on the drain plug indicating wear.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "case_052",
+    "input": "Probably nothing, but the pH probe has been reading 0.3 lower than the lab samples all week.",
+    "expected_category": "sensor_fault",
+    "expected_summary": "pH probe consistently reading 0.3 below verified lab samples for a week.",
+    "difficulty": "edge_case",
+    "notes": "Understated phrasing ('probably nothing') around a real, consistent calibration bias. Tests whether the model classifies the substance, not the reporter's confidence."
+  },
+  {
+    "id": "case_053",
+    "input": "HMI on the packaging line frozen on the loading screen, can't reach the PLC behind it either — network light is dark.",
+    "expected_category": "communication_error",
+    "expected_summary": "Packaging line HMI unreachable along with its PLC, network link appears down.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "case_054",
+    "input": "VFD on mixer 3 trips mid-cycle and the display hard-resets; smells faintly of hot electronics near the cabinet.",
+    "expected_category": "mechanical_fault",
+    "expected_summary": "Mixer 3 VFD tripping and resetting mid-cycle with a hot-electronics smell, suspected hardware failure.",
+    "difficulty": "edge_case",
+    "notes": "Electrical/hardware failure with no clean category — grouped under mechanical_fault as physical equipment failure. Genuinely debatable; review this label deliberately."
+  },
+  {
+    "id": "case_055",
+    "input": "Handover from night shift: production steady at 98% OEE, zero alarms, nothing to report.",
+    "expected_category": "nominal",
+    "expected_summary": "Night shift handover reports steady production with zero alarms.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "case_056",
+    "input": "the robot's 'real-time' link is now taking coffee breaks — commands land three seconds late when they land at all",
+    "expected_category": "communication_error",
+    "expected_summary": "Robot's communication link delivering commands with severe delay or not at all.",
+    "difficulty": "edge_case",
+    "notes": "Sarcastic and figurative ('taking coffee breaks'); the underlying issue is command latency/loss."
+  },
+  {
+    "id": "case_057",
+    "input": "Ultrasonic level sensor on silo 1 reads full whenever it rains — echoes off the wet dome suspected.",
+    "expected_category": "sensor_fault",
+    "expected_summary": "Silo 1 ultrasonic level sensor giving false full readings in rain, suspected echo interference.",
+    "difficulty": "edge_case",
+    "notes": "Wrong readings caused by environmental interference still count as sensor_fault (the data is bad), even though the device itself isn't broken."
+  },
+  {
+    "id": "case_058",
+    "input": "Replaced the axis 2 encoder yesterday; ran 500 test cycles this morning with zero faults logged.",
+    "expected_category": "nominal",
+    "expected_summary": "Axis 2 encoder replacement validated with 500 fault-free test cycles.",
+    "difficulty": "edge_case",
+    "notes": "Post-repair validation report — mentions a fault-adjacent history but current status is verified healthy."
+  },
+  {
+    "id": "case_059",
+    "input": "Cooling fan in the control cabinet rattles and stops intermittently, cabinet temperature creeping up.",
+    "expected_category": "mechanical_fault",
+    "expected_summary": "Control cabinet cooling fan failing intermittently, causing rising cabinet temperature.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "case_060",
+    "input": "Every wireless temperature transmitter in Hall C reports stale timestamps — values frozen for 20 minutes, radio link quality at 15%.",
+    "expected_category": "communication_error",
+    "expected_summary": "All Hall C wireless transmitters delivering stale data due to degraded radio link quality.",
+    "difficulty": "edge_case",
+    "notes": "Frozen values across ALL transmitters plus poor link quality points to the radio transport, not the sensors — same discrimination logic as case_025."
   }
 ]
