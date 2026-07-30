@@ -8,7 +8,7 @@ DEFAULT_HISTORY_PATH = "data/run_history.json"
 
 def load_run_history(path: str = DEFAULT_HISTORY_PATH) -> list:
     try:
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
         return []
@@ -23,23 +23,18 @@ def save_run(pass_rate: float, path: str = DEFAULT_HISTORY_PATH) -> None:
         }
     )
     Path(path).parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(history, f, indent=2)
 
 
 def check_drift(window: int = 7, threshold: float = 0.05, path: str = DEFAULT_HISTORY_PATH) -> dict:
-    """Compare the average pass rate of the last `window` runs against the
-    `window` runs before that. Flags drift if performance has slipped by
-    more than `threshold` (as an absolute fraction, e.g. 0.05 = 5 points).
-
-    Deliberately read-only — call save_run() separately to record a run.
-    """
+    """Compare recent vs older pass-rate windows. Read-only."""
     history = load_run_history(path)
     if len(history) < window:
         return {"drift_detected": False, "reason": "insufficient history"}
 
     recent = [r["pass_rate"] for r in history[-window:]]
-    older = history[-2 * window : -window]
+    older = history[-2 * window: -window]
     older = [r["pass_rate"] for r in older] if len(older) == window else recent
 
     recent_avg, older_avg = statistics.mean(recent), statistics.mean(older)
