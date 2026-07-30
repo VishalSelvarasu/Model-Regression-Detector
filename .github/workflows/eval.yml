@@ -1,0 +1,91 @@
+name: LLM Eval Gate
+
+# Two jobs on purpose:
+#   gate            — runs on every PR touching prompts/** or src/**.
+#                      Fails the PR if classification or summary quality
+#                      regresses. Read-only: never writes run history,
+#                      so an abandoned or unmerged branch can't pollute
+#                      the drift baseline.
+#   record-history   — runs after a merge to main. Records the *official*
+#                      pass rate for that commit and pushes the updated
+#                      data/run_history.json back to main. This is what
+#                      check_drift() actually compares against over time.
+
+on:
+  pull_request:
+    paths:
+      - 'prompts/**'
+      - 'src/**'
+  push:
+    branches: [main]
+    paths:
+      - 'prompts/**'
+      - 'src/**'
+
+jobs:
+  gate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install -r requirements.txt
+
+      - name: Run DeepEval regression suite (category + summary quality)
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PROMPT_VERSION: v1
+        run: deepeval test run tests/test_regression.py -v
+
+      - name: Preview pass rate + drift (read-only — does not save to history)
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PROMPT_VERSION: v1
+        run: python scripts/run_eval_and_record.py --dry-run
+
+      # Optional Slack alert on failure. Needs a free Slack incoming
+      # webhook added as the SLACK_WEBHOOK_URL repo secret. Uncomment to
+      # enable — send_slack_alert() no-ops safely if the secret is unset,
+      # so this is not required for the workflow to function.
+      # - name: Slack alert on failure
+      #   if: failure()
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #   run: |
+      #     python -c "
+      #     from src.alerting import send_slack_alert
+      #     send_slack_alert('critical', 0.0, [], '', {'drift_detected': False})"
+
+  record-history:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install -r requirements.txt
+
+      - name: Run eval, record pass rate, check drift
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PROMPT_VERSION: v1
+        run: python scripts/run_eval_and_record.py
+
+      - name: Commit updated run history
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/run_history.json
+          git diff --cached --quiet || git commit -m "chore: record eval run [skip ci]"
+          git push
