@@ -1,166 +1,198 @@
 # model-regression-detector
 
-A CI-integrated regression test suite for an LLM classification pipeline —
+A CI-integrated regression test suite for an LLM classification pipeline,
 built to catch prompt and model regressions automatically on every pull
-request, the same way you'd unit-test any other piece of production code.
+request, the same way you would unit-test any other production component.
 
-**Domain:** classifying free-text industrial/embedded fault reports into
-`sensor_fault`, `communication_error`, `mechanical_fault`, or `nominal`.
-Chosen to mirror real fault-analysis and industrial-automation work rather
-than a generic customer-support-ticket demo.
+**Domain:** classifying free-text industrial and embedded-system fault reports
+into `sensor_fault`, `communication_error`, `mechanical_fault`, or `nominal`.
 
-**Cost: $0.** Every LLM call — both the classifier itself and the judge
-model used for semantic scoring — runs on [Groq's](https://console.groq.com/keys)
-free-tier API. No OpenAI account, no local model downloads, nothing to install
-beyond a handful of small Python packages.
-
-## Why this exists
-
-Golden-dataset regression testing, drift detection over time, and a CI gate
-are the same tools MLOps/LLMOps teams use to keep prompt and model changes
-from silently degrading production quality. This project is a small, real
-implementation of that pattern — not a tutorial clone — meant to demonstrate
-applied testing/CI discipline around an LLM component, which is a directly
-transferable skill regardless of the specific domain.
+The project is designed to run on Groq's free plan. Both the classifier and
+the model used for advisory semantic scoring use the Groq API, so no OpenAI
+account or local model download is required.
 
 ## How it works
 
-```
-golden dataset (data/golden_dataset.json)
-        │
-        ▼
-tests/test_regression.py  ──▶  category: exact string match (fast, free, deterministic)
-   (DeepEval, per-PR gate)  ──▶  summary: GEval judged by Groq (semantic, still free)
-        │
-        ▼
-scripts/run_eval_and_record.py  ──▶  data/run_history.json  ──▶  src/drift.py
-   (pass-rate recorder)              (persisted history)         (rolling-window comparison)
-```
+1. `data/golden_dataset.json` provides the reviewed inputs and expected
+   classifications.
 
-Two things worth calling out about how this differs from a naive first pass:
+2. `tests/test_regression.py` checks the predicted category with an exact
+   string comparison. This deterministic category test is the blocking
+   per-pull-request CI gate.
 
-1. **Category uses plain string comparison, not an LLM judge.** With only
-   four possible categories, an LLM-as-judge metric is slower, costs a call,
-   and is *less* deterministic than `==`. GEval is reserved for `summary`,
-   the one field that's free text and genuinely needs semantic judgment.
-2. **Run history persistence is real, not aspirational.** `check_drift()`
-   is only useful if something actually calls `save_run()` after every
-   official run. `scripts/run_eval_and_record.py` is that missing piece,
-   and the CI workflow calls it on every merge to `main` and commits the
-   updated `data/run_history.json` back automatically.
+3. The test suite also evaluates generated summaries with GEval through the
+   Groq-backed judge. Summary scoring is advisory and does not block a merge.
+
+4. `scripts/run_eval_and_record.py` runs the golden dataset and writes the
+   resulting pass rate to `data/run_history.json`.
+
+5. `src/drift.py` compares recent results with the persisted historical
+   baseline to detect performance changes over time.
+
+## Findings
+
+Prompt iteration showed why aggregate accuracy is not enough to understand a
+model change. `v1` scored 93.3% on the original 15-case dataset, with
+`case_013` - "slight jitter in encoder feedback, probably nothing" -
+incorrectly classified as `nominal`. `v2` added generic few-shot examples but
+produced the same result and the same 93.3% score. The examples were too broad
+to address the specific failure.
+
+`v3` added an instruction to ignore reporter hedging when the report still
+describes a fault. That changed the prediction for `case_013` from `nominal`
+to `mechanical_fault`, but the expected category was `sensor_fault`, so the
+case still failed and the total score remained 93.3%. No other case regressed.
+The instruction moved the failure without fixing it, demonstrating that an
+unchanged score can conceal a meaningful change in model behaviour.
+
+`v4` extended the `sensor_fault` definition to explicitly include encoders and
+probes. That resolved `case_013`, producing 100% accuracy on the original
+15-case dataset. After the golden dataset was expanded to 60 cases, `v4`
+scored 98.3%.
+
+GEval was too inconsistent to remain a blocking check. It failed `case_002`
+because the generated summary paraphrased "twice this morning" as "brief
+outages", while passing another case whose summary introduced detail that was
+not present in the source report. Because the judge penalized an acceptable
+paraphrase while overlooking a genuine fabrication, summary scoring was
+demoted from a merge gate to an advisory diagnostic.
+
+The pass-rate recorder also contained a silent-failure path. It caught every
+exception raised during evaluation and still exited with status code `0`.
+Consequently, CI reported success after all 15 API calls failed and then
+committed a `0.0` pass rate into the drift baseline. The recorder now counts
+evaluation errors and calls `sys.exit(1)` when any occur, preventing failed
+runs from appearing successful or contaminating the historical data.
+
+`case_037` remains unresolved. Its report describes an issue that has already
+been resolved, but the classifier predicts `mechanical_fault` rather than
+`nominal`. That behaviour conflicts with the `v3` instruction: telling the
+model to discount reporter hedging also pushes it away from `nominal` when the
+reporter is describing recovery rather than uncertainty. The case is still
+open because fixing it requires distinguishing a resolved fault from hedged
+language without reintroducing the original `case_013` failure.
 
 ## Repo structure
 
-```
+```text
 model-regression-detector/
 ├── prompts/
-│   ├── v1.yaml              # baseline, zero-shot
-│   └── v2.yaml               # + two few-shot examples, for comparing versions
+│   ├── v1.yaml                     # baseline prompt
+│   ├── v2.yaml                     # prompt iteration
+│   ├── v3.yaml                     # prompt iteration
+│   └── v4.yaml                     # prompt iteration
 ├── data/
-│   ├── golden_dataset.json   # 15 hand-written test cases (expand this!)
-│   └── run_history.json      # pass-rate history, written by CI, read by drift.py
+│   ├── golden_dataset.json         # 60 reviewed golden test cases
+│   ├── golden_dataset_candidates.json
+│   │                               # staging area for proposed dataset additions
+│   └── run_history.json            # pass-rate history written by CI
 ├── src/
-│   ├── feature.py            # the classifier itself (Groq-backed)
-│   ├── groq_judge.py         # routes DeepEval's GEval judge through Groq too
-│   ├── drift.py               # rolling-window drift comparison
-│   ├── report.py              # markdown summary renderer
-│   └── alerting.py            # optional Slack alert, safe no-op if unconfigured
+│   ├── feature.py                  # Groq-backed classifier
+│   ├── groq_judge.py               # routes GEval judging through Groq
+│   ├── drift.py                    # rolling-window drift comparison
+│   ├── report.py                   # markdown summary renderer
+│   └── alerting.py                 # optional Slack alerting
 ├── scripts/
-│   └── run_eval_and_record.py # runs golden set, saves pass rate, checks drift
+│   ├── run_eval_and_record.py      # runs the golden set and records results
+│   └── merge_candidates.py         # merges reviewed candidate cases
 ├── tests/
-│   └── test_regression.py     # the actual pytest/DeepEval suite CI runs
-├── .github/workflows/eval.yml # gate (PRs) + record-history (push to main)
+│   └── test_regression.py          # category and advisory summary evaluations
+├── .github/
+│   └── workflows/
+│       └── eval.yml                # PR gate and main-branch history recording
 ├── .env.example
 └── requirements.txt
 ```
 
 ## Setup (local)
 
-1. **Get a free Groq API key:** https://console.groq.com/keys — no credit
-   card required.
+1. **Get a Groq API key:**
 
-2. **Install dependencies** (a virtualenv is recommended):
+   Create an API key at https://console.groq.com/keys.
+
+2. **Install dependencies:**
+
+   A virtual environment is recommended.
+
    ```bash
    python3 -m venv .venv
    source .venv/bin/activate
    pip install -r requirements.txt
    ```
 
-3. **Configure your key:**
+3. **Configure the API key:**
+
    ```bash
    cp .env.example .env
-   # then edit .env and paste your GROQ_API_KEY
+   # Edit .env and add your GROQ_API_KEY.
    ```
 
-4. **Run the test suite:**
-   ```bash
-   deepeval test run tests/test_regression.py -v
-   ```
-   First run may prompt you about creating a free Confident AI account for
-   a hosted dashboard — that's optional, DeepEval, skip it if you like; the
-   tests still run fully locally either way.
+4. **Run the blocking category tests:**
 
-5. **Run the pass-rate recorder** (this is what actually builds up drift
-   history over time):
    ```bash
-   python scripts/run_eval_and_record.py           # records a real run
-   python scripts/run_eval_and_record.py --dry-run  # preview only
+   pytest tests/test_regression.py -v -k test_category
+   ```
+
+   These tests do not require a Confident AI account. If you run the DeepEval
+   summary evaluation separately and receive a prompt to create an account for
+   the hosted dashboard, that account is optional. Skip the prompt to keep the
+   evaluation local.
+
+5. **Run the pass-rate recorder:**
+
+   This command builds the historical data used for drift detection.
+
+   ```bash
+   python scripts/run_eval_and_record.py            # record a real run
+   python scripts/run_eval_and_record.py --dry-run  # preview without saving
    ```
 
 ## Setup (CI)
 
-1. Push this repo to GitHub.
-2. Add one repo secret: **Settings → Secrets and variables → Actions →
-   New repository secret** → name it `GROQ_API_KEY`.
-3. Make sure **Settings → Actions → General → Workflow permissions** is
-   set to "Read and write permissions" — the `record-history` job needs
-   this to commit `run_history.json` back to `main`.
-4. Open a PR that touches `prompts/**` or `src/**` and watch the `gate`
-   job run. Merge it and watch `record-history` run and push an updated
-   `data/run_history.json`.
+1. Push the repository to GitHub.
 
-No other secrets are required. Slack alerting is optional and commented
-out in `.github/workflows/eval.yml` — see `src/alerting.py` if you want to
-wire it up later.
+2. Add the `GROQ_API_KEY` repository secret under:
 
-## Testing a prompt change (this is the actual point of the project)
+   **Settings → Secrets and variables → Actions → New repository secret**
+
+3. Under **Settings → Actions → General → Workflow permissions**, enable
+   **Read and write permissions**. The history-recording job requires write
+   access to commit updates to `data/run_history.json`.
+
+4. Open a pull request that changes any of the following paths:
+
+   ```text
+   prompts/**
+   src/**
+   scripts/**
+   tests/**
+   data/golden_dataset.json
+   ```
+
+   The `gate` job will run the deterministic category tests. After the pull
+   request is merged, the `record-history` job will run and commit the updated
+   `data/run_history.json` to `main`.
+
+No additional secrets are required. Slack alerting is optional and disabled by
+default in `.github/workflows/eval.yml`; its implementation is in
+`src/alerting.py`.
+
+## Testing a prompt change
+
+Run each prompt version against the same dataset so the results remain
+comparable:
 
 ```bash
-# Baseline
 python scripts/run_eval_and_record.py --version v1 --dry-run
-
-# Try the few-shot variant
 python scripts/run_eval_and_record.py --version v2 --dry-run
+python scripts/run_eval_and_record.py --version v3 --dry-run
+python scripts/run_eval_and_record.py --version v4 --dry-run
 ```
 
-Compare the two pass rates. In CI, `PROMPT_VERSION` is set as an env var
-in the workflow — bump it to test a different prompt on a given PR without
-touching any code.
+Compare the category pass rates and inspect the individual cases whose outcomes
+changed between versions. Treat the summary evaluation as diagnostic evidence,
+not as a blocking result.
 
-## Roadmap / next steps
-
-- **Expand the golden dataset** from 15 to 60–80 cases. 45 draft
-  candidates are staged in `data/golden_dataset_candidates.json` — review
-  each label (edge cases especially), correct anything you disagree with,
-  then merge with `python scripts/merge_candidates.py --ids case_016,...`
-  (or `--all` once fully reviewed). An unreviewed machine-drafted dataset
-  is not a golden dataset — the review IS the work.
-- **Track summary-quality pass rate over time too**, not just category —
-  right now only category feeds `run_history.json`.
-- Once there's a few weeks of real history, put an actual drift chart
-  (pass rate over time) in this README with real numbers — that's the
-  difference between "I followed a tutorial" and "I built something."
-
-## Design decisions, for anyone reading this as a portfolio piece
-
-- **Groq instead of OpenAI**, for both the classifier and the DeepEval
-  judge model (`src/groq_judge.py`) — GEval defaults to OpenAI otherwise,
-  which would quietly require a paid API key.
-- **String match for category, GEval only for summary** — don't reach for
-  an LLM judge where a deterministic check is strictly better.
-- **`gate` vs `record-history` as separate CI jobs** — an unmerged PR
-  branch should never be able to corrupt the drift baseline that future
-  PRs get compared against.
-- **GitHub's built-in `$GITHUB_STEP_SUMMARY`** instead of a PR-comment
-  bot — zero extra permissions, zero extra GitHub Action dependency,
-  renders markdown natively in the Actions tab.
+In CI, the prompt version is selected through the `PROMPT_VERSION` environment
+variable in the workflow. Change that value to evaluate a different prompt
+version without modifying the classifier implementation.
