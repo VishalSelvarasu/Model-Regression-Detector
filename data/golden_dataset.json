@@ -86,7 +86,7 @@
   },
   {
     "id": "case_011",
-    "input": "Vibration levels on Pump 4 hit 12.4 mm/s, above the 10 mm/s ISO threshold, bearing wear suspected.",
+    "input": "Vibration levels on Pump 4 hit 12.4 mm/s, above the site's 10 mm/s alarm threshold, bearing wear suspected.",
     "expected_category": "mechanical_fault",
     "expected_summary": "Pump 4 vibration exceeded the ISO threshold, suspected bearing wear.",
     "difficulty": "easy",

@@ -19,6 +19,8 @@ on:
       - 'scripts/**'
       - 'tests/**'
       - 'data/golden_dataset.json'
+      - 'requirements.txt'
+      - '.github/workflows/**'
   push:
     branches: [main]
     paths:
@@ -27,6 +29,8 @@ on:
       - 'scripts/**'
       - 'tests/**'
       - 'data/golden_dataset.json'
+      - 'requirements.txt'
+      - '.github/workflows/**'      
 
 jobs:
   gate:
