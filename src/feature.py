@@ -11,7 +11,7 @@ from pydantic import BaseModel
 load_dotenv()  # loads .env locally; CI uses real env vars
 
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
-DEFAULT_MODEL = "llama-3.1-8b-instant"
+DEFAULT_MODEL = "openai/gpt-oss-20b"
 
 CATEGORIES = ("sensor_fault", "communication_error",
               "mechanical_fault", "nominal")

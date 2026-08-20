@@ -7,7 +7,7 @@ GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 
 
 class GroqDeepEvalLLM(DeepEvalBaseLLM):
-    def __init__(self, model_name: str = "llama-3.1-8b-instant"):
+    def __init__(self, model_name: str = "openai/gpt-oss-20b"):
         api_key = os.environ.get("GROQ_API_KEY")
         if not api_key:
             raise RuntimeError(
