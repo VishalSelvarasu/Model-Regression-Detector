@@ -58,3 +58,13 @@ def test_save_run_then_load_run_history(tmp_path):
     assert len(history) == 1
     assert history[0]["pass_rate"] == pytest.approx(0.9)
     assert "timestamp" in history[0]
+
+
+def test_save_run_stores_metadata(tmp_path):
+    p = tmp_path / "history.json"
+
+    save_run(0.5, path=str(p), prompt_version="v4", dataset_size=60)
+    entry = load_run_history(path=str(p))[0]
+
+    assert entry["prompt_version"] == "v4"
+    assert entry["dataset_size"] == 60

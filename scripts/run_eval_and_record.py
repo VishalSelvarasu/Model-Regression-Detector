@@ -6,7 +6,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.drift import check_drift, save_run  # noqa: E402
-from src.feature import classify_fault_report  # noqa: E402
+from src.feature import DEFAULT_MODEL, classify_fault_report  # noqa: E402
 from src.report import render_markdown_summary  # noqa: E402
 
 
@@ -46,7 +46,13 @@ def run(version: str, dry_run: bool) -> float:
         sys.exit(1)
 
     if not dry_run:
-        save_run(pass_rate)
+        save_run(
+            pass_rate,
+            prompt_version=version,
+            model=DEFAULT_MODEL,
+            dataset_size=len(cases),
+            failed_cases=[r["id"] for r in results if not r["correct"]],
+        )
         print("Recorded to data/run_history.json")
     else:
         print("--dry-run: not saved to history")

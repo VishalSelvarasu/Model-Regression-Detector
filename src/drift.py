@@ -14,14 +14,14 @@ def load_run_history(path: str = DEFAULT_HISTORY_PATH) -> list:
         return []
 
 
-def save_run(pass_rate: float, path: str = DEFAULT_HISTORY_PATH) -> None:
+def save_run(pass_rate: float, path: str = DEFAULT_HISTORY_PATH, **metadata) -> None:
     history = load_run_history(path)
-    history.append(
-        {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "pass_rate": pass_rate,
-        }
-    )
+    entry = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "pass_rate": pass_rate,
+    }
+    entry.update(metadata)
+    history.append(entry)
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(history, f, indent=2)
