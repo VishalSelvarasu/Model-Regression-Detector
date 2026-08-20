@@ -45,7 +45,7 @@ jobs:
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           PROMPT_VERSION: v4
-        run: pytest tests/test_regression.py -k test_category -v
+        run: pytest tests/test_regression.py -k "test_category_classification" -v
 
       - name: Summary quality (advisory, non-blocking)
         continue-on-error: true
@@ -54,6 +54,13 @@ jobs:
           PROMPT_VERSION: v4
         run: pytest tests/test_regression.py -k test_summary -v
 
+      - name: Ambiguous cases (advisory, non-blocking)
+        continue-on-error: true
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PROMPT_VERSION: v4
+        run: pytest tests/test_regression.py -k test_category_advisory -v
+        
       - name: Preview pass rate + drift (read-only — does not save to history)
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}

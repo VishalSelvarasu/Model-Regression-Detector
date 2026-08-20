@@ -4,28 +4,32 @@
     "input": "Temperature sensor on Line 3 is reading -40C intermittently, looks like a wiring fault.",
     "expected_category": "sensor_fault",
     "expected_summary": "Line 3 temperature sensor giving intermittent faulty readings, likely a wiring issue.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_002",
     "input": "PLC lost connection to the HMI panel twice this morning, dropped out for about 10 seconds each time.",
     "expected_category": "communication_error",
     "expected_summary": "PLC-to-HMI connection dropped out twice this morning for about 10 seconds each time.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_003",
     "input": "Conveyor belt motor #2 is grinding loudly and vibrating more than usual.",
     "expected_category": "mechanical_fault",
     "expected_summary": "Conveyor belt motor #2 is grinding and vibrating abnormally.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_004",
     "input": "Daily inspection complete, all systems within normal parameters, no anomalies noted.",
     "expected_category": "nominal",
     "expected_summary": "Daily inspection found all systems operating normally.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_005",
@@ -33,7 +37,8 @@
     "expected_category": "mechanical_fault",
     "expected_summary": "Gearbox noise reported alongside an abnormal pressure sensor reading; root cause unclear.",
     "difficulty": "edge_case",
-    "notes": "Ambiguous: touches both mechanical_fault and sensor_fault. Treated as mechanical_fault since the physical noise is the primary symptom."
+    "notes": "Ambiguous: touches both mechanical_fault and sensor_fault. Treated as mechanical_fault since the physical noise is the primary symptom.",
+    "gate": "hard"
   },
   {
     "id": "case_006",
@@ -41,7 +46,8 @@
     "expected_category": "sensor_fault",
     "expected_summary": "Tank 2 pressure sensor giving abnormal readings since this morning, possibly faulty.",
     "difficulty": "edge_case",
-    "notes": "Heavy typos in input; tests robustness to noisy free text."
+    "notes": "Heavy typos in input; tests robustness to noisy free text.",
+    "gate": "hard"
   },
   {
     "id": "case_007",
@@ -49,7 +55,8 @@
     "expected_category": "communication_error",
     "expected_summary": "Robot arm stopped responding to commands with no errors logged.",
     "difficulty": "edge_case",
-    "notes": "Sarcastic tone. Core issue is a command/communication failure with the arm, not a physical symptom, so it's communication_error rather than mechanical_fault."
+    "notes": "Sarcastic tone. Core issue is a command/communication failure with the arm, not a physical symptom, so it's communication_error rather than mechanical_fault.",
+    "gate": "hard"
   },
   {
     "id": "case_008",
@@ -57,14 +64,16 @@
     "expected_category": "sensor_fault",
     "expected_summary": "Line 3 temperature sensor showing unusual readings since this morning, possibly defective.",
     "difficulty": "edge_case",
-    "notes": "Report written in German. Should classify the same as an equivalent English report — tests multilingual handling."
+    "notes": "Report written in German. Should classify the same as an equivalent English report — tests multilingual handling.",
+    "gate": "hard"
   },
   {
     "id": "case_009",
     "input": "No comms from PLC-7 since 09:14, panel shows offline.",
     "expected_category": "communication_error",
     "expected_summary": "PLC-7 offline with no communication since 09:14.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_010",
@@ -72,21 +81,24 @@
     "expected_category": "nominal",
     "expected_summary": "Line 2 sensor issue from yesterday has not recurred; systems have been steady since.",
     "difficulty": "edge_case",
-    "notes": "Mentions a past fault but current status is nominal — tests whether the classifier over-indexes on fault keywords instead of overall status."
+    "notes": "Mentions a past fault but current status is nominal — tests whether the classifier over-indexes on fault keywords instead of overall status.",
+    "gate": "hard"
   },
   {
     "id": "case_011",
     "input": "Vibration levels on Pump 4 hit 12.4 mm/s, above the 10 mm/s ISO threshold, bearing wear suspected.",
     "expected_category": "mechanical_fault",
     "expected_summary": "Pump 4 vibration exceeded the ISO threshold, suspected bearing wear.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_012",
     "input": "Modbus TCP timeout errors spiking on PLC-7, packet loss around 30 percent.",
     "expected_category": "communication_error",
     "expected_summary": "PLC-7 experiencing Modbus TCP timeouts with roughly 30% packet loss.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_013",
@@ -94,14 +106,16 @@
     "expected_category": "sensor_fault",
     "expected_summary": "Minor jitter noticed in encoder feedback; otherwise the system appears normal.",
     "difficulty": "edge_case",
-    "notes": "Borderline nominal-vs-fault. The report downplays the issue but still describes a sensor anomaly, not a clean bill of health."
+    "notes": "Borderline nominal-vs-fault. The report downplays the issue but still describes a sensor anomaly, not a clean bill of health.",
+    "gate": "hard"
   },
   {
     "id": "case_014",
     "input": "Bearing on the main drive shaft is overheating and smells like burning rubber.",
     "expected_category": "mechanical_fault",
     "expected_summary": "Main drive shaft bearing is overheating with a burning smell.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_015",
@@ -109,35 +123,40 @@
     "expected_category": "communication_error",
     "expected_summary": "Robotic arm responding late or not at all, with no error codes logged.",
     "difficulty": "edge_case",
-    "notes": "Genuinely ambiguous between communication_error and mechanical_fault. Labeled communication_error because delayed/missing response with zero error codes points more toward a comms/timing issue than a hard mechanical failure — but mechanical_fault is a defensible alternative answer. Good candidate to revisit once you have real-world labeled data."
+    "notes": "Genuinely ambiguous between communication_error and mechanical_fault. Labeled communication_error because delayed/missing response with zero error codes points more toward a comms/timing issue than a hard mechanical failure — but mechanical_fault is a defensible alternative answer. Good candidate to revisit once you have real-world labeled data.",
+    "gate": "advisory"
   },
   {
     "id": "case_016",
     "input": "Flow meter FM-2 stuck at 0.0 L/min even though the pump is clearly running.",
     "expected_category": "sensor_fault",
     "expected_summary": "Flow meter FM-2 reads zero despite the pump visibly running.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_017",
     "input": "Profinet connection to the weld robot dropping every few minutes, error 0x8004 on the panel.",
     "expected_category": "communication_error",
     "expected_summary": "Weld robot's Profinet connection drops intermittently with error 0x8004.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_018",
     "input": "Drive belt on conveyor 5 is frayed at the edges and slipping under load.",
     "expected_category": "mechanical_fault",
     "expected_summary": "Conveyor 5 drive belt is frayed and slipping under load.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_019",
     "input": "Weekly PM completed on Line 1, lubrication topped up, all readings in spec.",
     "expected_category": "nominal",
     "expected_summary": "Line 1 weekly preventive maintenance completed with all readings within spec.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_020",
@@ -145,7 +164,8 @@
     "expected_category": "sensor_fault",
     "expected_summary": "Tank 7 level sensor reporting an impossible 110% reading, likely failed again.",
     "difficulty": "edge_case",
-    "notes": "Heavy typos and informal grammar; tests robustness to noisy free text."
+    "notes": "Heavy typos and informal grammar; tests robustness to noisy free text.",
+    "gate": "hard"
   },
   {
     "id": "case_021",
@@ -153,14 +173,16 @@
     "expected_category": "communication_error",
     "expected_summary": "PLC-7 is offline.",
     "difficulty": "edge_case",
-    "notes": "Extremely terse two-word report; tests behavior on minimal input."
+    "notes": "Extremely terse two-word report; tests behavior on minimal input.",
+    "gate": "hard"
   },
   {
     "id": "case_022",
     "input": "Thermocouple TC-4 on the oven reads a constant 25C regardless of setpoint, suspect open junction.",
     "expected_category": "sensor_fault",
     "expected_summary": "Oven thermocouple TC-4 stuck at a constant reading, suspected open junction.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_023",
@@ -168,7 +190,8 @@
     "expected_category": "mechanical_fault",
     "expected_summary": "Furnace zone 2 is genuinely overheating, confirmed by an independent measurement.",
     "difficulty": "edge_case",
-    "notes": "Mentions a sensor but the sensor is explicitly verified as accurate — the fault is the physical overheating, not the measurement. Tests whether the model over-indexes on the word 'sensor'."
+    "notes": "Mentions a sensor but the sensor is explicitly verified as accurate — the fault is the physical overheating, not the measurement. Tests whether the model over-indexes on the word 'sensor'.",
+    "gate": "hard"
   },
   {
     "id": "case_024",
@@ -176,7 +199,8 @@
     "expected_category": "sensor_fault",
     "expected_summary": "Vibration probe on channel 3 delivering no data, likely damaged cabling.",
     "difficulty": "edge_case",
-    "notes": "A single measurement device failing to deliver readings is sensor_fault (missing readings), even though wiring is involved. Contrast with case_025 where the whole network layer is implicated."
+    "notes": "A single measurement device failing to deliver readings is sensor_fault (missing readings), even though wiring is involved. Contrast with case_025 where the whole network layer is implicated.",
+    "gate": "hard"
   },
   {
     "id": "case_025",
@@ -184,14 +208,16 @@
     "expected_category": "communication_error",
     "expected_summary": "All Line 2 sensors went offline simultaneously after a network switch reboot.",
     "difficulty": "edge_case",
-    "notes": "Simultaneous loss of ALL devices after a switch event points to the transport layer, not the sensors themselves. Paired discriminator with case_024."
+    "notes": "Simultaneous loss of ALL devices after a switch event points to the transport layer, not the sensors themselves. Paired discriminator with case_024.",
+    "gate": "hard"
   },
   {
     "id": "case_026",
     "input": "Main spindle bearing running hot, smells like burnt grease near the housing.",
     "expected_category": "mechanical_fault",
     "expected_summary": "Main spindle bearing overheating with a burnt grease smell.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_027",
@@ -199,7 +225,8 @@
     "expected_category": "sensor_fault",
     "expected_summary": "Tank 4 pressure sensor has delivered no values since the shift change.",
     "difficulty": "easy",
-    "notes": "German-language report."
+    "notes": "German-language report.",
+    "gate": "hard"
   },
   {
     "id": "case_028",
@@ -207,7 +234,8 @@
     "expected_category": "communication_error",
     "expected_summary": "Connection to the PLC has been dropping repeatedly since this morning, panel shows timeouts.",
     "difficulty": "easy",
-    "notes": "German-language report (SPS = PLC)."
+    "notes": "German-language report (SPS = PLC).",
+    "gate": "hard"
   },
   {
     "id": "case_029",
@@ -215,7 +243,8 @@
     "expected_category": "nominal",
     "expected_summary": "System ran stably through the night shift with no faults or anomalies.",
     "difficulty": "easy",
-    "notes": "German-language report, nominal status."
+    "notes": "German-language report, nominal status.",
+    "gate": "hard"
   },
   {
     "id": "case_030",
@@ -223,7 +252,8 @@
     "expected_category": "mechanical_fault",
     "expected_summary": "Line 2 gearbox making abnormal metal-on-metal noises during startup.",
     "difficulty": "edge_case",
-    "notes": "Mixed German/English in one sentence — realistic for a German plant with international staff."
+    "notes": "Mixed German/English in one sentence — realistic for a German plant with international staff.",
+    "gate": "hard"
   },
   {
     "id": "case_031",
@@ -231,35 +261,40 @@
     "expected_category": "sensor_fault",
     "expected_summary": "Tank level sensor giving contradictory full-and-empty readings.",
     "difficulty": "edge_case",
-    "notes": "Sarcastic tone wrapped around a real sensor failure."
+    "notes": "Sarcastic tone wrapped around a real sensor failure.",
+    "gate": "hard"
   },
   {
     "id": "case_032",
     "input": "OPC UA clients can't subscribe since the certificate renewal, server rejects every session.",
     "expected_category": "communication_error",
     "expected_summary": "OPC UA server rejecting all client sessions since a certificate renewal.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_033",
     "input": "CAN bus flooded with error frames after adding the new I/O node, bus load at 92%.",
     "expected_category": "communication_error",
     "expected_summary": "CAN bus overloaded with error frames after a new I/O node was added.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_034",
     "input": "Proximity switch on the gripper false-triggers every few cycles with nothing in range.",
     "expected_category": "sensor_fault",
     "expected_summary": "Gripper proximity switch producing false triggers with nothing in range.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_035",
     "input": "Hydraulic press loses pressure overnight, fresh oil puddle under the ram seal.",
     "expected_category": "mechanical_fault",
     "expected_summary": "Hydraulic press losing pressure overnight with a visible leak at the ram seal.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_036",
@@ -267,7 +302,8 @@
     "expected_category": "mechanical_fault",
     "expected_summary": "Station 8 pneumatic cylinder actuating slower than normal, seals or air supply suspected.",
     "difficulty": "edge_case",
-    "notes": "Could arguably be a utilities/air-supply issue, but the primary reported symptom is degraded physical actuation."
+    "notes": "Could arguably be a utilities/air-supply issue, but the primary reported symptom is degraded physical actuation.",
+    "gate": "hard"
   },
   {
     "id": "case_037",
@@ -275,7 +311,8 @@
     "expected_category": "nominal",
     "expected_summary": "Pump 2 vibration alarm was caused by a loose sensor bracket, now fixed with readings normal.",
     "difficulty": "edge_case",
-    "notes": "Past issue, already resolved — current status is nominal. Tests over-indexing on words like 'alarm' and 'vibration'."
+    "notes": "Past issue, already resolved — current status is nominal. Tests over-indexing on words like 'alarm' and 'vibration'.",
+    "gate": "hard"
   },
   {
     "id": "case_038",
@@ -283,14 +320,16 @@
     "expected_category": "nominal",
     "expected_summary": "Quarterly fault-injection test passed with all alarms behaving as designed.",
     "difficulty": "edge_case",
-    "notes": "Full of fault vocabulary ('fault-injection', 'alarms', 'comms') but describes a successful test on a healthy system."
+    "notes": "Full of fault vocabulary ('fault-injection', 'alarms', 'comms') but describes a successful test on a healthy system.",
+    "gate": "hard"
   },
   {
     "id": "case_039",
     "input": "Reminder logged: quarterly gearbox lubrication due next week. No current issues on the line.",
     "expected_category": "nominal",
     "expected_summary": "Maintenance reminder for upcoming gearbox lubrication; no current issues.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_040",
@@ -298,14 +337,16 @@
     "expected_category": "communication_error",
     "expected_summary": "Robot arm's Ethernet connection drops at a specific position, suspected drag-chain cable damage.",
     "difficulty": "edge_case",
-    "notes": "Root cause is likely physical cable wear, but the reported symptom is the comms drop — labeled communication_error per the primary-symptom rule. mechanical_fault is a defensible alternative; good discussion case."
+    "notes": "Root cause is likely physical cable wear, but the reported symptom is the comms drop — labeled communication_error per the primary-symptom rule. mechanical_fault is a defensible alternative; good discussion case.",
+    "gate": "advisory"
   },
   {
     "id": "case_041",
     "input": "Load cell LC-12 drifting about +0.8 kg per hour, zero offset now at 14.3 kg after tare.",
     "expected_category": "sensor_fault",
     "expected_summary": "Load cell LC-12 exhibiting continuous drift with a growing zero offset.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_042",
@@ -313,14 +354,16 @@
     "expected_category": "mechanical_fault",
     "expected_summary": "Line 5 emergency stop triggered by a shredded belt, urgent maintenance requested.",
     "difficulty": "edge_case",
-    "notes": "All-caps urgent tone; tests robustness to shouting/urgency formatting."
+    "notes": "All-caps urgent tone; tests robustness to shouting/urgency formatting.",
+    "gate": "hard"
   },
   {
     "id": "case_043",
     "input": "AGV 4 loses Wi-Fi in the cold-storage aisle every run and pauses until it reconnects.",
     "expected_category": "communication_error",
     "expected_summary": "AGV 4 repeatedly loses Wi-Fi coverage in the cold-storage aisle and pauses.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_044",
@@ -328,7 +371,8 @@
     "expected_category": "mechanical_fault",
     "expected_summary": "AGV 4 losing wheel traction on a frosty floor, with patchy Wi-Fi noted as secondary.",
     "difficulty": "edge_case",
-    "notes": "Deliberate near-duplicate of case_043 with a different primary symptom (physical traction loss). Paired discriminator — the model must weigh the primary symptom, not pattern-match the scenario."
+    "notes": "Deliberate near-duplicate of case_043 with a different primary symptom (physical traction loss). Paired discriminator — the model must weigh the primary symptom, not pattern-match the scenario.",
+    "gate": "hard"
   },
   {
     "id": "case_045",
@@ -336,7 +380,8 @@
     "expected_category": "mechanical_fault",
     "expected_summary": "Loose, discolored connection lug on busbar B causing a thermal hotspot.",
     "difficulty": "easy",
-    "notes": "Electrical hardware damage is grouped under mechanical_fault as a physical fault; the camera worked correctly."
+    "notes": "Electrical hardware damage is grouped under mechanical_fault as a physical fault; the camera worked correctly.",
+    "gate": "hard"
   },
   {
     "id": "case_046",
@@ -344,14 +389,16 @@
     "expected_category": "sensor_fault",
     "expected_summary": "Tank 2 pressure sensor acting up again with fluctuating values.",
     "difficulty": "edge_case",
-    "notes": "Informal German with no capitalization — colloquial 'spinnt' (acting up)."
+    "notes": "Informal German with no capitalization — colloquial 'spinnt' (acting up).",
+    "gate": "hard"
   },
   {
     "id": "case_047",
     "input": "Encoder counts on axis 2 jump around at standstill, position readout drifts a few millimetres.",
     "expected_category": "sensor_fault",
     "expected_summary": "Axis 2 encoder producing unstable counts at standstill, causing position drift.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_048",
@@ -359,14 +406,16 @@
     "expected_category": "mechanical_fault",
     "expected_summary": "Axis 2 stalling mid-move with motor strain, possibly a loose coupling.",
     "difficulty": "edge_case",
-    "notes": "Paired discriminator with case_047: same axis, but here the symptom is physical stalling, not bad readings."
+    "notes": "Paired discriminator with case_047: same axis, but here the symptom is physical stalling, not bad readings.",
+    "gate": "hard"
   },
   {
     "id": "case_049",
     "input": "Modbus RTU polling to the energy meters times out on every third request since the wiring rework.",
     "expected_category": "communication_error",
     "expected_summary": "Modbus RTU polling to energy meters intermittently timing out since a wiring rework.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_050",
@@ -374,14 +423,16 @@
     "expected_category": "nominal",
     "expected_summary": "Thorough inspection of all systems came back clean with no faults found.",
     "difficulty": "edge_case",
-    "notes": "Rambling report that name-drops every fault category while describing a clean bill of health."
+    "notes": "Rambling report that name-drops every fault category while describing a clean bill of health.",
+    "gate": "hard"
   },
   {
     "id": "case_051",
     "input": "Gearbox on the palletizer whines under load and there are metal flakes on the magnetic drain plug.",
     "expected_category": "mechanical_fault",
     "expected_summary": "Palletizer gearbox whining under load with metal debris on the drain plug indicating wear.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_052",
@@ -389,14 +440,16 @@
     "expected_category": "sensor_fault",
     "expected_summary": "pH probe consistently reading 0.3 below verified lab samples for a week.",
     "difficulty": "edge_case",
-    "notes": "Understated phrasing ('probably nothing') around a real, consistent calibration bias. Tests whether the model classifies the substance, not the reporter's confidence."
+    "notes": "Understated phrasing ('probably nothing') around a real, consistent calibration bias. Tests whether the model classifies the substance, not the reporter's confidence.",
+    "gate": "hard"
   },
   {
     "id": "case_053",
     "input": "HMI on the packaging line frozen on the loading screen, can't reach the PLC behind it either — network light is dark.",
     "expected_category": "communication_error",
     "expected_summary": "Packaging line HMI unreachable along with its PLC, network link appears down.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_054",
@@ -404,14 +457,16 @@
     "expected_category": "mechanical_fault",
     "expected_summary": "Mixer 3 VFD tripping and resetting mid-cycle with a hot-electronics smell, suspected hardware failure.",
     "difficulty": "edge_case",
-    "notes": "Electrical/hardware failure with no clean category — grouped under mechanical_fault as physical equipment failure. Genuinely debatable; review this label deliberately."
+    "notes": "Electrical/hardware failure with no clean category — grouped under mechanical_fault as physical equipment failure. Genuinely debatable; review this label deliberately.",
+    "gate": "advisory"
   },
   {
     "id": "case_055",
     "input": "Handover from night shift: production steady at 98% OEE, zero alarms, nothing to report.",
     "expected_category": "nominal",
     "expected_summary": "Night shift handover reports steady production with zero alarms.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_056",
@@ -419,7 +474,8 @@
     "expected_category": "communication_error",
     "expected_summary": "Robot's communication link delivering commands with severe delay or not at all.",
     "difficulty": "edge_case",
-    "notes": "Sarcastic and figurative ('taking coffee breaks'); the underlying issue is command latency/loss."
+    "notes": "Sarcastic and figurative ('taking coffee breaks'); the underlying issue is command latency/loss.",
+    "gate": "hard"
   },
   {
     "id": "case_057",
@@ -427,7 +483,8 @@
     "expected_category": "sensor_fault",
     "expected_summary": "Silo 1 ultrasonic level sensor giving false full readings in rain, suspected echo interference.",
     "difficulty": "edge_case",
-    "notes": "Wrong readings caused by environmental interference still count as sensor_fault (the data is bad), even though the device itself isn't broken."
+    "notes": "Wrong readings caused by environmental interference still count as sensor_fault (the data is bad), even though the device itself isn't broken.",
+    "gate": "hard"
   },
   {
     "id": "case_058",
@@ -435,14 +492,16 @@
     "expected_category": "nominal",
     "expected_summary": "Axis 2 encoder replacement validated with 500 fault-free test cycles.",
     "difficulty": "edge_case",
-    "notes": "Post-repair validation report — mentions a fault-adjacent history but current status is verified healthy."
+    "notes": "Post-repair validation report — mentions a fault-adjacent history but current status is verified healthy.",
+    "gate": "hard"
   },
   {
     "id": "case_059",
     "input": "Cooling fan in the control cabinet rattles and stops intermittently, cabinet temperature creeping up.",
     "expected_category": "mechanical_fault",
     "expected_summary": "Control cabinet cooling fan failing intermittently, causing rising cabinet temperature.",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "gate": "hard"
   },
   {
     "id": "case_060",
@@ -450,6 +509,7 @@
     "expected_category": "communication_error",
     "expected_summary": "All Hall C wireless transmitters delivering stale data due to degraded radio link quality.",
     "difficulty": "edge_case",
-    "notes": "Frozen values across ALL transmitters plus poor link quality points to the radio transport, not the sensors — same discrimination logic as case_025."
+    "notes": "Frozen values across ALL transmitters plus poor link quality points to the radio transport, not the sensors — same discrimination logic as case_025.",
+    "gate": "hard"
   }
 ]

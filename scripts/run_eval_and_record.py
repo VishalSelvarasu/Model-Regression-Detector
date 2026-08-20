@@ -41,6 +41,10 @@ def run(version: str, dry_run: bool) -> float:
     print(
         f"\nPass rate: {pass_rate:.1%} ({sum(r['correct'] for r in results)}/{len(results)})")
 
+    if errors:
+        print(f"{errors} case(s) errored - not recording run")
+        sys.exit(1)
+
     if not dry_run:
         save_run(pass_rate)
         print("Recorded to data/run_history.json")
@@ -60,10 +64,6 @@ def run(version: str, dry_run: bool) -> float:
             f.write(markdown + "\n")
     else:
         print("\n" + markdown)
-
-    if errors:
-        print(f"{errors} case(s) errored - failing the run")
-        sys.exit(1)
 
     return pass_rate
 

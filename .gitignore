@@ -12,3 +12,5 @@ reports/
 .deepeval/
 .latest_run_full.json
 .latest_test_run.json
+run_*.txt
+*-reference.pdf

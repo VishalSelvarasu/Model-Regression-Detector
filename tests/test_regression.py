@@ -12,6 +12,8 @@ from src.groq_judge import GroqDeepEvalLLM
 
 with open("data/golden_dataset.json", encoding="utf-8") as f:
     golden_cases = json.load(f)
+    hard_cases = [c for c in golden_cases if c.get("gate", "hard") == "hard"]
+    advisory_cases = [c for c in golden_cases if c.get("gate") == "advisory"]
 
 PROMPT_VERSION = os.environ.get("PROMPT_VERSION", "v1")
 
@@ -44,12 +46,18 @@ def get_prediction(report_text: str):
     return classify_fault_report(report_text, version=PROMPT_VERSION)
 
 
-@pytest.mark.parametrize("case", golden_cases, ids=[c["id"] for c in golden_cases])
+@pytest.mark.parametrize("case", hard_cases, ids=[c["id"] for c in hard_cases])
 def test_category_classification(case):
     result = get_prediction(case["input"])
     assert result.category == case["expected_category"], (
         f"{case['id']}: expected '{case['expected_category']}', got '{result.category}'"
     )
+
+
+@pytest.mark.parametrize("case", advisory_cases, ids=[c["id"] for c in advisory_cases])
+def test_category_advisory(case):
+    result = get_prediction(case["input"])
+    assert result.category == case["expected_category"]
 
 
 @pytest.mark.parametrize("case", golden_cases, ids=[c["id"] for c in golden_cases])

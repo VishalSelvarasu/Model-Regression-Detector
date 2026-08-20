@@ -1,6 +1,6 @@
 version_id: v4
 timestamp: "2026-07-13"
-description: "Baseline zero-shot classifier prompt."
+description: "v3 plus encoders and probes in the sensor_fault definition."
 system_prompt: |
   You are an industrial fault-report classification assistant. You will be
   given a short, free-text report from a technician about an industrial or
