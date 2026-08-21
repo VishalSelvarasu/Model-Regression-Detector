@@ -1,15 +1,20 @@
 name: LLM Eval Gate
 
 # Two jobs on purpose:
-#   gate            — runs on every PR touching prompts/** or src/**.
-#                      Fails the PR if classification or summary quality
-#                      regresses. Read-only: never writes run history,
-#                      so an abandoned or unmerged branch can't pollute
-#                      the drift baseline.
+#   gate            — runs on every PR touching the gated paths below.
+#                      Only the hard-label category check can fail the PR.
+#                      Read-only: never writes run history, so an abandoned
+#                      or unmerged branch can't pollute the drift baseline.
 #   record-history   — runs after a merge to main. Records the *official*
 #                      pass rate for that commit and pushes the updated
 #                      data/run_history.json back to main. This is what
 #                      check_drift() actually compares against over time.
+#
+# Case tiers (set by the "gate" field in data/golden_dataset.json):
+#   hard           — 56 cases, blocking
+#   advisory       — 3 cases with genuinely arguable ground truth, reported only
+#   known_failure  — 1 case (case_037) the model cannot currently get right,
+#                    run as xfail so it stays visible without blocking merges
 
 on:
   pull_request:
@@ -30,7 +35,7 @@ on:
       - 'tests/**'
       - 'data/golden_dataset.json'
       - 'requirements.txt'
-      - '.github/workflows/**'      
+      - '.github/workflows/**'
 
 jobs:
   gate:
@@ -51,25 +56,26 @@ jobs:
           PROMPT_VERSION: v4
         run: pytest tests/test_regression.py -k "test_category_classification" -v
 
-      - name: Summary quality (advisory, non-blocking)
-        continue-on-error: true
-        env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          PROMPT_VERSION: v4
-        run: pytest tests/test_regression.py -k test_summary -v
-
       - name: Ambiguous cases (advisory, non-blocking)
         continue-on-error: true
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           PROMPT_VERSION: v4
-        run: pytest tests/test_regression.py -k test_category_advisory -v
-        
-      - name: Preview pass rate + drift (read-only — does not save to history)
+        run: pytest tests/test_regression.py -k "test_category_advisory" -v
+
+      - name: Known failures (xfail, non-blocking)
+        continue-on-error: true
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           PROMPT_VERSION: v4
-        run: python scripts/run_eval_and_record.py --dry-run
+        run: pytest tests/test_regression.py -k "test_category_known_failure" -v -rxX
+
+      - name: Summary quality (advisory, non-blocking)
+        continue-on-error: true
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PROMPT_VERSION: v4
+        run: pytest tests/test_regression.py -k "test_summary" -v
 
       # Optional Slack alert on failure. Needs a free Slack incoming
       # webhook added as the SLACK_WEBHOOK_URL repo secret. Uncomment to

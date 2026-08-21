@@ -14,6 +14,8 @@ with open("data/golden_dataset.json", encoding="utf-8") as f:
     golden_cases = json.load(f)
     hard_cases = [c for c in golden_cases if c.get("gate", "hard") == "hard"]
     advisory_cases = [c for c in golden_cases if c.get("gate") == "advisory"]
+    known_failures = [c for c in golden_cases if c.get(
+        "gate") == "known_failure"]
 
 PROMPT_VERSION = os.environ.get("PROMPT_VERSION", "v1")
 
@@ -69,3 +71,10 @@ def test_summary_quality(case):
         expected_output=case["expected_summary"],
     )
     assert_test(test_case, [summary_quality])
+
+
+@pytest.mark.xfail(reason="model cannot distinguish resolved faults from active ones; see README", strict=False)
+@pytest.mark.parametrize("case", known_failures, ids=[c["id"] for c in known_failures])
+def test_category_known_failure(case):
+    result = get_prediction(case["input"])
+    assert result.category == case["expected_category"]

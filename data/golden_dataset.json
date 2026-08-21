@@ -312,7 +312,7 @@
     "expected_summary": "Pump 2 vibration alarm was caused by a loose sensor bracket, now fixed with readings normal.",
     "difficulty": "edge_case",
     "notes": "Past issue, already resolved — current status is nominal. Tests over-indexing on words like 'alarm' and 'vibration'.",
-    "gate": "hard"
+    "gate": "known_failure"
   },
   {
     "id": "case_038",

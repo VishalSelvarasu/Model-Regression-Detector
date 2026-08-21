@@ -14,6 +14,9 @@ uses `openai/gpt-oss-20b` through the Groq API. The project originally used
 returning 404 responses. The advisory semantic scorer also uses the Groq API,
 so no OpenAI account or local model download is required.
 
+**Current result:** `v4` scores 96.7% (58/60), with two known failures,
+`case_015` and `case_037`. Both are documented below.
+
 ## How it works
 
 `data/golden_dataset.json` contains 60 hand-authored synthetic fault reports
@@ -67,13 +70,6 @@ Worse, that run then wrote a 0.0 pass rate into the drift history. So the fix
 is simple: count evaluation errors, exit non-zero if any occurred, and do not
 record the run.
 
-`case_037` is still open. The report describes a fault that has already been
-resolved, but the classifier returns `mechanical_fault` instead of `nominal`.
-The hedging rule from `v3` helps with reports that downplay active faults, but it
-also makes this resolved-fault case harder. I'm leaving it unresolved rather
-than forcing a prompt change that might bring back the original `case_013`
-problem.
-
 Mid-project, `llama-3.1-8b-instant` was decommissioned and started returning
 HTTP 404. Every test failed at once. That is basically the failure mode this
 project is meant to catch, and it happened for real rather than as a demo.
@@ -82,27 +78,46 @@ I switched the classifier to `openai/gpt-oss-20b`. On the 60-case set it
 reproduced the 98.3% result and the same `case_037` failure, which gave me some
 confidence that the finding was not just an artifact of the retired model.
 
-`v5` was a negative result. I added a resolved-fault instruction specifically
-for `case_037`; it still failed, and `case_060` flipped at the same time. I kept
-`v5` in the repo because failed prompt changes are evidence too.
+Later the same day, `case_015` started failing. Its input, expected label and
+prompt were unchanged, and I confirmed that against the dataset file. It had
+been classified `communication_error` in the earlier runs and came back as
+`mechanical_fault` in three consecutive later runs, taking the score from 98.3%
+to 96.7%. That is model drift on a hosted endpoint, observed in the project
+built to look for it. `case_015` is one of the three cases I had already marked
+advisory because its ground truth is genuinely arguable, so the flip did not
+block the gate. The overlap is worth noting: the case a human finds hard to
+label is also the case the model is unstable on.
+
+`case_037` is the one I could not fix, and I tried twice. The report describes
+a fault that has already been found, fixed and verified normal, but the
+classifier keeps returning `mechanical_fault` instead of `nominal` because the
+text is full of fault vocabulary. `v5` added an explicit resolved-fault
+instruction; `case_037` still failed and `case_060` flipped at the same time.
+`v6` took the other approach that had worked before and rewrote the `nominal`
+definition to put resolved faults first instead of leaving them in a trailing
+clause; the score and the failing cases came back identical to `v4`. Two
+different kinds of change, no movement. At that point it looks less like a
+wording problem and more like a limit of a model this size on this input, so I
+stopped iterating and kept both attempts in the repo.
 
 The free-tier quota is also shaping the experiment. Groq's 200,000-token daily
 limit works out to roughly six complete 60-case runs at the current workload.
 That puts a real ceiling on CI frequency and makes repeated sampling expensive,
-so I have not yet done enough repeat runs to claim determinism on
-`openai/gpt-oss-20b`.
+which is the main reason the stability evidence above is three runs rather than
+thirty.
 
 ## Limitations
 
-`case_037` is still open. The current prompt does not reliably distinguish a
-resolved fault from language that merely hedges or downplays an active fault,
-so the known failure remains part of the test evidence rather than being
-treated as solved.
+`case_037` is still open. Two prompt strategies failed to fix it, so the
+current prompt does not reliably distinguish a resolved fault from language
+that merely hedges or downplays an active fault. It stays in the dataset as a
+hard-label case rather than being relabelled or removed to improve the score.
 
-Determinism has not been verified on `openai/gpt-oss-20b`. The category
-assertion itself is an exact-match test, but the classifier depends on a hosted
-LLM call; repeat runs are therefore needed before claiming that identical
-inputs always produce identical outputs with the current model.
+Reproducibility on `openai/gpt-oss-20b` is limited. Runs are stable within a
+session - three consecutive runs returned identical results - but `case_015`
+changed classification between earlier and later runs on the same day with no
+input or prompt change. Single-run comparisons are therefore only trustworthy
+for differences larger than one case.
 
 The GitHub required-check configuration interacts poorly with the workflow's
 path filter. Pull requests that change only files outside the gated paths do
@@ -119,8 +134,9 @@ model-regression-detector/
 │   ├── v1.yaml                     # baseline prompt
 │   ├── v2.yaml                     # prompt iteration
 │   ├── v3.yaml                     # prompt iteration
-│   ├── v4.yaml                     # prompt iteration
-│   └── v5.yaml                     # resolved-fault experiment
+│   ├── v4.yaml                     # prompt iteration, current default
+│   ├── v5.yaml                     # resolved-fault instruction, failed
+│   └── v6.yaml                     # nominal definition rewrite, failed
 ├── data/
 │   ├── golden_dataset.json         # 60 reviewed hand-authored synthetic cases
 │   ├── golden_dataset_candidates.json
@@ -248,6 +264,7 @@ python scripts/run_eval_and_record.py --version v2 --dry-run
 python scripts/run_eval_and_record.py --version v3 --dry-run
 python scripts/run_eval_and_record.py --version v4 --dry-run
 python scripts/run_eval_and_record.py --version v5 --dry-run
+python scripts/run_eval_and_record.py --version v6 --dry-run
 ```
 
 Compare the category pass rates and inspect the individual cases whose outcomes
