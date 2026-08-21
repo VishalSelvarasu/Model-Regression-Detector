@@ -30,7 +30,7 @@ def _client() -> OpenAI:
             "GROQ_API_KEY is not set. Copy .env.example to .env and add a "
             "free key from https://console.groq.com/keys"
         )
-    return OpenAI(api_key=api_key, base_url=GROQ_BASE_URL)
+    return OpenAI(api_key=api_key, base_url=GROQ_BASE_URL, max_retries=5)
 
 
 @lru_cache(maxsize=None)

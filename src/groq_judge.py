@@ -19,7 +19,7 @@ class GroqDeepEvalLLM(DeepEvalBaseLLM):
         super().__init__(model_name)
 
     def load_model(self):
-        return OpenAI(api_key=self.api_key, base_url=GROQ_BASE_URL)
+        return OpenAI(api_key=self.api_key, base_url=GROQ_BASE_URL, max_retries=5)
 
     def generate(self, prompt: str) -> str:
         response = self.model.chat.completions.create(
